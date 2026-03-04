@@ -21,4 +21,4 @@ chmod +x hello.py
 
 ## Author
 
-chenzihui222 from Beijing University!
+chenzihui222
