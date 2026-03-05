@@ -34,7 +34,13 @@ function getNotes() {
 function createNoteCard(note) {
     const excerpt = stripHtml(note.content).substring(0, 100) + '...';
     const coverStyle = note.cover ? `background-image: url('${note.cover}')` : '';
-    const date = new Date(note.createdAt).toLocaleDateString('zh-CN');
+    const date = new Date(note.createdAt).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
     
     return `
         <div class="note-card" onclick="showDetail('${note.id}')">
@@ -121,7 +127,13 @@ function showDetail(id) {
     
     document.getElementById('detail-title').textContent = note.title;
     document.getElementById('detail-author').textContent = note.author;
-    document.getElementById('detail-date').textContent = new Date(note.createdAt).toLocaleDateString('zh-CN');
+    document.getElementById('detail-date').textContent = new Date(note.createdAt).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
     document.getElementById('detail-content').innerHTML = note.content;
     
     const coverContainer = document.getElementById('detail-cover');
