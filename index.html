@@ -20,10 +20,15 @@
         <!-- 头部导航 -->
         <header class="header">
             <div class="logo">
-                <h1>📚 读书笔记</h1>
-                <p class="subtitle">记录阅读的美好时光</p>
+                <h1 data-i18n="siteTitle">📚 读书笔记</h1>
+                <p class="subtitle" data-i18n="siteSubtitle">记录阅读的美好时光</p>
             </div>
-            <button class="btn-primary" onclick="showEditor()">+ 写笔记</button>
+            <div class="header-actions">
+                <button class="lang-switcher" onclick="toggleLanguage()">
+                    <span id="current-lang">🇨🇳 中文</span>
+                </button>
+                <button class="btn-primary" onclick="showEditor()" data-i18n="writeNote">+ 写笔记</button>
+            </div>
         </header>
 
         <!-- 笔记列表 -->
@@ -35,16 +40,16 @@
             <!-- 空状态提示 -->
             <div id="empty-state" class="empty-state" style="display: none;">
                 <div class="empty-icon">📝</div>
-                <h3>还没有笔记</h3>
-                <p>点击"写笔记"按钮，开始记录你的第一本书吧！</p>
+                <h3 data-i18n="emptyTitle">还没有笔记</h3>
+                <p data-i18n="emptyDesc">点击"写笔记"按钮，开始记录你的第一本书吧！</p>
             </div>
         </main>
 
         <!-- 为你推荐 -->
         <section id="recommendation-section" class="recommendation-section" style="display: none;">
             <div class="recommendation-header">
-                <h2>🎯 为你推荐</h2>
-                <p>根据你的阅读偏好，为你精选以下书籍</p>
+                <h2 data-i18n="recommendTitle">🎯 为你推荐</h2>
+                <p data-i18n="recommendDesc">根据你的阅读偏好，为你精选以下书籍</p>
             </div>
             <div id="recommendation-list" class="recommendation-grid">
                 <!-- 推荐书籍将在这里动态生成 -->
@@ -55,48 +60,48 @@
         <div id="editor-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>写读书笔记</h2>
+                    <h2 data-i18n="editorTitle">写读书笔记</h2>
                     <button class="close-btn" onclick="closeEditor()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="book-title">书名</label>
-                        <input type="text" id="book-title" placeholder="请输入书名...">
+                        <label for="book-title" data-i18n="bookName">书名</label>
+                        <input type="text" id="book-title" data-i18n-placeholder="bookNamePlaceholder">
                     </div>
                     <div class="form-group">
-                        <label for="book-author">作者</label>
-                        <input type="text" id="book-author" placeholder="请输入作者...">
+                        <label for="book-author" data-i18n="bookAuthor">作者</label>
+                        <input type="text" id="book-author" data-i18n-placeholder="authorPlaceholder">
                     </div>
                     <div class="form-group">
-                        <label for="note-content">笔记内容</label>
+                        <label for="note-content" data-i18n="noteContent">笔记内容</label>
                         <div class="toolbar">
                             <button type="button" onclick="formatText('bold')" title="加粗"><strong>B</strong></button>
                             <button type="button" onclick="formatText('italic')" title="斜体"><em>I</em></button>
                             <button type="button" onclick="formatText('underline')" title="下划线"><u>U</u></button>
                             <span class="separator">|</span>
-                            <button type="button" onclick="formatText('insertUnorderedList')" title="列表">• 列表</button>
-                            <button type="button" onclick="formatText('insertOrderedList')" title="编号列表">1. 列表</button>
+                            <button type="button" onclick="formatText('insertUnorderedList')" title="列表">• <span data-i18n="list">列表</span></button>
+                            <button type="button" onclick="formatText('insertOrderedList')" title="编号列表">1. <span data-i18n="numberedList">列表</span></button>
                             <span class="separator">|</span>
                             <label class="upload-btn">
-                                📷 插入图片
+                                📷 <span data-i18n="insertImage">插入图片</span>
                                 <input type="file" id="image-input" accept="image/*" onchange="handleImageUpload(event)">
                             </label>
                         </div>
-                        <div id="editor" class="editor" contenteditable="true" placeholder="在这里写下你的读书心得..."></div>
+                        <div id="editor" class="editor" contenteditable="true" data-i18n-placeholder="editorPlaceholder"></div>
                     </div>
                     <div class="form-group">
-                        <label>封面图片</label>
+                        <label data-i18n="coverImage">封面图片</label>
                         <div class="cover-upload">
                             <div id="cover-preview" class="cover-preview" onclick="document.getElementById('cover-input').click()">
-                                <span class="upload-placeholder">点击上传封面</span>
+                                <span class="upload-placeholder" data-i18n="uploadCover">点击上传封面</span>
                             </div>
                             <input type="file" id="cover-input" accept="image/*" onchange="handleCoverUpload(event)">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary" onclick="closeEditor()">取消</button>
-                    <button class="btn-primary" onclick="saveNote()">保存笔记</button>
+                    <button class="btn-secondary" onclick="closeEditor()" data-i18n="cancel">取消</button>
+                    <button class="btn-primary" onclick="saveNote()" data-i18n="saveNote">保存笔记</button>
                 </div>
             </div>
         </div>
@@ -117,8 +122,8 @@
                     <div id="detail-content" class="detail-text"></div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-danger" onclick="deleteCurrentNote()">删除笔记</button>
-                    <button class="btn-secondary" onclick="closeDetail()">关闭</button>
+                    <button class="btn-danger" onclick="deleteCurrentNote()" data-i18n="deleteNote">删除笔记</button>
+                    <button class="btn-secondary" onclick="closeDetail()" data-i18n="close">关闭</button>
                 </div>
             </div>
         </div>
