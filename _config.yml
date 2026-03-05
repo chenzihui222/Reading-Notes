@@ -3,8 +3,8 @@ title: 读书心得
 email: your-email@example.com
 description: >-
   分享我的读书心得和笔记，记录阅读旅程中的思考和收获。
-baseurl: ""
-url: "https://yourusername.github.io"
+baseurl: "/Reading-Notes"
+url: "https://chenzihui222.github.io"
 
 # Build settings
 markdown: kramdown
