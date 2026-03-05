@@ -1,59 +1,648 @@
----
-layout: default
-title: 首页
----
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>读书笔记</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="hero">
-  <h1>读书心得</h1>
-  <p class="subtitle">记录阅读中的思考与收获</p>
-</div>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
 
-<div class="content">
-  <h2>最新笔记</h2>
-  
-  <div class="posts-list">
-    {% for post in site.posts limit:5 %}
-    <article class="post-card">
-      <div class="post-meta">
-        <span class="post-date">{{ post.date | date: "%Y年%m月%d日" }}</span>
-        {% if post.tags %}
-        <span class="post-tags">
-          {% for tag in post.tags %}
-          <span class="tag">{{ tag }}</span>
-          {% endfor %}
-        </span>
-        {% endif %}
-      </div>
-      <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
-      <p class="post-excerpt">{{ post.excerpt | strip_html | truncate: 150 }}</p>
-      <a href="{{ post.url | relative_url }}" class="read-more">阅读更多 →</a>
-    </article>
-    {% endfor %}
-  </div>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-  {% if site.posts.size > 5 %}
-  <div class="pagination">
-    <a href="/page2/" class="btn">查看更早的文章</a>
-  </div>
-  {% endif %}
-</div>
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+        }
 
-<div class="content">
-  <h2>推荐阅读</h2>
-  <div class="books-grid">
-    {% for book in site.books limit:3 %}
-    <div class="book-card">
-      <div class="book-cover">
-        {% if book.cover %}
-        <img src="{{ book.cover | relative_url }}" alt="{{ book.title }}">
-        {% else %}
-        <div class="book-placeholder">📚</div>
-        {% endif %}
-      </div>
-      <h4><a href="{{ book.url | relative_url }}">{{ book.title }}</a></h4>
-      <p class="book-author">{{ book.author }}</p>
-      <p class="book-rating">{% for i in (1..book.rating) %}★{% endfor %}</p>
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* 笔记卡片 */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .note-header {
+            margin-bottom: 12px;
+        }
+
+        .note-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .note-book {
+            color: #667eea;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .note-date {
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .note-content {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 12px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .note-rating {
+            color: #ffc107;
+            font-size: 1.1rem;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .note-actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .edit-btn {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .edit-btn:hover {
+            background: #bbdefb;
+        }
+
+        .delete-btn {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .delete-btn:hover {
+            background: #ffcdd2;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .image-upload {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 5px;
+            font-size: 24px;
+        }
+
+        .rating-input span {
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .rating-input span.active {
+            color: #ffc107;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 读书笔记</h1>
+        <p class="subtitle">记录每一本书带来的感动与思考</p>
+    </header>
+
+    <div class="container">
+        <div id="notesContainer" class="notes-grid">
+            <!-- 笔记将在这里显示 -->
+        </div>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📝</div>
+            <h3>还没有笔记</h3>
+            <p>点击右下角按钮添加你的第一篇读书笔记</p>
+        </div>
     </div>
-    {% endfor %}
-  </div>
-</div>
+
+    <button class="add-btn" onclick="openModal()">+</button>
+
+    <!-- 添加/编辑笔记模态框 -->
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">添加笔记</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="noteForm">
+                <input type="hidden" id="noteId">
+                
+                <div class="form-group">
+                    <label>书名 *</label>
+                    <input type="text" id="bookTitle" placeholder="例如：小王子" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>作者</label>
+                    <input type="text" id="bookAuthor" placeholder="例如：圣埃克苏佩里">
+                </div>
+                
+                <div class="form-group">
+                    <label>笔记标题 *</label>
+                    <input type="text" id="noteTitle" placeholder="给你的笔记起个标题" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>阅读心得 *</label>
+                    <textarea id="noteContent" placeholder="写下你的感悟、摘录、思考..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>评分</label>
+                    <div class="rating-input" id="ratingInput">
+                        <span data-rating="1">★</span>
+                        <span data-rating="2">★</span>
+                        <span data-rating="3">★</span>
+                        <span data-rating="4">★</span>
+                        <span data-rating="5">★</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>添加图片</label>
+                    <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+                        <p>📷 点击上传图片</p>
+                        <small>支持 JPG、PNG 格式</small>
+                    </div>
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                    <button type="button" id="removeImageBtn" class="btn btn-secondary" style="display: none; margin-top: 10px;" onclick="removeImage()">删除图片</button>
+                </div>
+                
+                <button type="submit" class="btn" style="width: 100%;">保存笔记</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 数据存储
+        let notes = JSON.parse(localStorage.getItem('readingNotes')) || [];
+        let currentRating = 0;
+        let currentImage = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderNotes();
+            initRating();
+        });
+
+        // 渲染笔记列表
+        function renderNotes() {
+            const container = document.getElementById('notesContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (notes.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            // 按时间倒序排列
+            const sortedNotes = notes.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = sortedNotes.map(note => `
+                <div class="note-card" onclick="viewNote('${note.id}')">
+                    <div class="note-header">
+                        <div class="note-title">${escapeHtml(note.noteTitle)}</div>
+                        <div class="note-book">📖 ${escapeHtml(note.bookTitle)}${note.bookAuthor ? ' · ' + escapeHtml(note.bookAuthor) : ''}</div>
+                        <div class="note-date">${formatDate(note.date)}</div>
+                        ${note.rating ? `<div class="note-rating">${'★'.repeat(note.rating)}</div>` : ''}
+                    </div>
+                    <div class="note-content">${escapeHtml(note.noteContent)}</div>
+                    ${note.image ? `<img src="${note.image}" class="note-image" alt="笔记图片">` : ''}
+                    <div class="note-actions" onclick="event.stopPropagation()">
+                        <button class="edit-btn" onclick="editNote('${note.id}')">✏️ 编辑</button>
+                        <button class="delete-btn" onclick="deleteNote('${note.id}')">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 打开模态框
+        function openModal(noteId = null) {
+            const modal = document.getElementById('noteModal');
+            const form = document.getElementById('noteForm');
+            const title = document.getElementById('modalTitle');
+            
+            form.reset();
+            currentRating = 0;
+            currentImage = null;
+            updateRatingDisplay();
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('removeImageBtn').style.display = 'none';
+            
+            if (noteId) {
+                const note = notes.find(n => n.id === noteId);
+                if (note) {
+                    title.textContent = '编辑笔记';
+                    document.getElementById('noteId').value = note.id;
+                    document.getElementById('bookTitle').value = note.bookTitle;
+                    document.getElementById('bookAuthor').value = note.bookAuthor || '';
+                    document.getElementById('noteTitle').value = note.noteTitle;
+                    document.getElementById('noteContent').value = note.noteContent;
+                    currentRating = note.rating || 0;
+                    updateRatingDisplay();
+                    if (note.image) {
+                        currentImage = note.image;
+                        document.getElementById('imagePreview').src = note.image;
+                        document.getElementById('imagePreview').style.display = 'block';
+                        document.getElementById('removeImageBtn').style.display = 'inline-block';
+                    }
+                }
+            } else {
+                title.textContent = '添加笔记';
+                document.getElementById('noteId').value = '';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('noteModal').classList.remove('active');
+        }
+
+        // 处理表单提交
+        document.getElementById('noteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const noteId = document.getElementById('noteId').value;
+            const noteData = {
+                id: noteId || Date.now().toString(),
+                bookTitle: document.getElementById('bookTitle').value,
+                bookAuthor: document.getElementById('bookAuthor').value,
+                noteTitle: document.getElementById('noteTitle').value,
+                noteContent: document.getElementById('noteContent').value,
+                rating: currentRating,
+                image: currentImage,
+                date: new Date().toISOString()
+            };
+            
+            if (noteId) {
+                // 编辑现有笔记
+                const index = notes.findIndex(n => n.id === noteId);
+                if (index !== -1) {
+                    notes[index] = { ...notes[index], ...noteData, date: notes[index].date };
+                }
+            } else {
+                // 添加新笔记
+                notes.push(noteData);
+            }
+            
+            saveNotes();
+            renderNotes();
+            closeModal();
+        });
+
+        // 编辑笔记
+        function editNote(id) {
+            openModal(id);
+        }
+
+        // 删除笔记
+        function deleteNote(id) {
+            if (confirm('确定要删除这条笔记吗？')) {
+                notes = notes.filter(n => n.id !== id);
+                saveNotes();
+                renderNotes();
+            }
+        }
+
+        // 查看笔记详情（可以扩展）
+        function viewNote(id) {
+            // 可以在这里添加查看详情的功能
+            console.log('查看笔记:', id);
+        }
+
+        // 保存到本地存储
+        function saveNotes() {
+            localStorage.setItem('readingNotes', JSON.stringify(notes));
+        }
+
+        // 初始化评分功能
+        function initRating() {
+            const stars = document.querySelectorAll('#ratingInput span');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    currentRating = parseInt(this.dataset.rating);
+                    updateRatingDisplay();
+                });
+            });
+        }
+
+        // 更新评分显示
+        function updateRatingDisplay() {
+            const stars = document.querySelectorAll('#ratingInput span');
+            stars.forEach((star, index) => {
+                if (index < currentRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // 处理图片上传
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('图片大小不能超过 5MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImage = e.target.result;
+                document.getElementById('imagePreview').src = currentImage;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('removeImageBtn').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 删除图片
+        function removeImage() {
+            currentImage = null;
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('removeImageBtn').style.display = 'none';
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('noteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
