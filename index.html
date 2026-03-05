@@ -333,6 +333,129 @@
             margin-bottom: 20px;
         }
 
+        /* 详情模态框样式 */
+        .detail-content {
+            max-width: 700px;
+        }
+
+        .detail-header {
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-book-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-book-cover {
+            width: 80px;
+            height: 110px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .detail-book-text h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .detail-book-text .author {
+            color: #667eea;
+            font-size: 1rem;
+        }
+
+        .detail-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .detail-meta {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .detail-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .detail-rating {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+
+        .detail-body {
+            line-height: 1.8;
+            color: #444;
+            font-size: 1.05rem;
+            white-space: pre-wrap;
+        }
+
+        .detail-body p {
+            margin-bottom: 15px;
+        }
+
+        .detail-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .detail-actions button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .detail-edit-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .detail-edit-btn:hover {
+            background: #5568d3;
+        }
+
+        .detail-close-btn {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .detail-close-btn:hover {
+            background: #d0d0d0;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
@@ -423,6 +546,20 @@
                 
                 <button type="submit" class="btn" style="width: 100%;">保存笔记</button>
             </form>
+        </div>
+    </div>
+
+    <!-- 详情查看模态框 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content detail-content">
+            <div class="modal-header">
+                <h2 class="modal-title">笔记详情</h2>
+                <button class="close-btn" onclick="closeDetailModal()">&times;</button>
+            </div>
+            
+            <div id="detailContent">
+                <!-- 详情内容将在这里显示 -->
+            </div>
         </div>
     </div>
 
@@ -563,10 +700,56 @@
             }
         }
 
-        // 查看笔记详情（可以扩展）
+        // 查看笔记详情
         function viewNote(id) {
-            // 可以在这里添加查看详情的功能
-            console.log('查看笔记:', id);
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailContent');
+
+            content.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-book-info">
+                        <div class="detail-book-cover">📚</div>
+                        <div class="detail-book-text">
+                            <h2>${escapeHtml(note.bookTitle)}</h2>
+                            ${note.bookAuthor ? `<p class="author">✍️ ${escapeHtml(note.bookAuthor)}</p>` : ''}
+                        </div>
+                    </div>
+                    <h1 class="detail-title">${escapeHtml(note.noteTitle)}</h1>
+                    <div class="detail-meta">
+                        <span>📅 ${formatDate(note.date)}</span>
+                        ${note.rating ? `<span class="detail-rating">${'★'.repeat(note.rating)}</span>` : ''}
+                    </div>
+                </div>
+                
+                <div class="detail-body">
+                    ${escapeHtml(note.noteContent)}
+                </div>
+                
+                ${note.image ? `<img src="${note.image}" class="detail-image" alt="笔记图片">` : ''}
+                
+                <div class="detail-actions">
+                    <button class="detail-edit-btn" onclick="editNoteFromDetail('${note.id}')">✏️ 编辑笔记</button>
+                    <button class="detail-close-btn" onclick="closeDetailModal()">关闭</button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        // 从详情页编辑笔记
+        function editNoteFromDetail(id) {
+            closeDetailModal();
+            setTimeout(() => {
+                editNote(id);
+            }, 300);
+        }
+
+        // 关闭详情模态框
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('active');
         }
 
         // 保存到本地存储
@@ -643,6 +826,12 @@
         document.getElementById('noteModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
+            }
+        });
+
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDetailModal();
             }
         });
     </script>
