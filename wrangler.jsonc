@@ -13,7 +13,7 @@
     }
   ],
   "vars": {
-    "GITHUB_CLIENT_ID": ""
+    "GITHUB_CLIENT_ID": "Ov23liUmS25ZJ1HmMEVk"
   },
   "routes": [
     { "pattern": "notes.zihuichen.com", "custom_domain": true }
