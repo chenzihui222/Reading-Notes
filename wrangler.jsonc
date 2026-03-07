@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zihui-notes",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "zihui-notes-db",
+      "database_id": "698723a3-ed1e-416a-8a7e-f33fbb47b7a3",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "GITHUB_CLIENT_ID": "Ov23liUmS25ZJ1HmMEVk"
+  },
+  "routes": [
+    { "pattern": "notes.zihuichen.com", "custom_domain": true }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "zihui-notes-images"
+    }
+  ]
+}
